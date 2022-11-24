@@ -17,6 +17,7 @@ function App() {
 			<h1>Vite + React</h1>
 			<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
 				<DirectCanvas />
+				<GameCanvas />
 			</div>
 
 		</div>

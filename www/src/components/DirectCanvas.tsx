@@ -1,8 +1,8 @@
-import { CanvasSource, Universe } from "rust-canvas-prototype";
-import { memory } from "../../../pkg/rust_canvas_prototype_bg.wasm"
-import styles from "./DirectCanvas.module.css";
+import { useEffect, useRef, useState } from "react";
+import { CanvasSource } from "rust-canvas-prototype";
+import { memory } from "../../../pkg/rust_canvas_prototype_bg.wasm";
 import { useFPS } from "../hooks/useFPS";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import styles from "./DirectCanvas.module.css";
 
 const getRenderLoop = (
 	source: CanvasSource,
