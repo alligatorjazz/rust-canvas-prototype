@@ -3,10 +3,7 @@ mod canvas_source;
 mod universe;
 use wasm_bindgen::prelude::*;
 extern crate fixedbitset;
-
-
 extern crate web_sys;
-
 
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -21,7 +18,7 @@ extern "C" {
 }
 
 // TODO: find out why it demands UPPER_SNAKE_CASE
-#[wasm_bindgen]
+#[wasm_bindgen] 
 pub fn greet(name: &str) {
     alert(&format!("Hello {}!", name));
 }

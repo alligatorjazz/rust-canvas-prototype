@@ -12,14 +12,18 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
-
+winit = "0.27"
+env_logger = "0.9"
+log = "0.4"
+wgpu = "0.14"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.6", optional = true }
-
+console_log = { version = "0.2", features = ["color"] }
+x
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
@@ -28,10 +32,13 @@ getrandom = { version = "0.2", features = ["js"] }
 rand = "0.8.5"
 fixedbitset = "0.4.2"
 
-[dependencies.web-sys]
-version = "0.3"
-features = ["console"]
 
+web-sys = { version = "0.3.60", features = [
+	"console",
+	"Gpu",
+	"GpuTextureFormat",
+	"Gpu",
+] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
