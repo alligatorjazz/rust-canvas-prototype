@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { Universe } from "vite-rust-wasm";
+import { Universe } from "rust-canvas-prototype";
 import { ALIVE_COLOR, CELL_SIZE, DEAD_COLOR, GRID_COLOR } from "../config";
-import { memory } from "vite-rust-wasm/vite_rust_wasm_bg.wasm";
+import { memory } from "../../../pkg/rust_canvas_prototype_bg.wasm"
 import styles from "./GameCanvas.module.css";
 import { useFPS } from "../hooks/useFPS";
 

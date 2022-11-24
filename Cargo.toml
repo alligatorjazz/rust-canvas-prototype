@@ -1,5 +1,5 @@
 [package]
-name = "vite-rust-wasm"
+name = "rust-canvas-prototype"
 version = "0.1.0"
 authors = ["Damian Thomas <damian@falchionstudios.com>"]
 edition = "2018"

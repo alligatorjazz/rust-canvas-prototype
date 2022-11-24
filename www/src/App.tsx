@@ -1,7 +1,7 @@
 import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { GameCanvas } from "./components/GameCanvas";
-import { Greeter } from "./components/Greeter";
+import { DirectCanvas } from "./components/DirectCanvas";
 
 function App() {
 	return (
@@ -15,8 +15,8 @@ function App() {
 				</a>
 			</div>
 			<h1>Vite + React</h1>
-			<div style={{display: "flex", flexDirection: "column", gap: "2rem"}}>
-				<GameCanvas />
+			<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+				<DirectCanvas />
 			</div>
 
 		</div>

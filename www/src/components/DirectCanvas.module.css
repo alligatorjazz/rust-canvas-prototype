@@ -1,0 +1,27 @@
+.Container {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.Controls {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	width: 100%;
+}
+
+.Controls button {
+	width: 100%
+}
+
+.Dashboard {
+	padding: 0.2rem;
+	border: 1px solid darkgrey;
+	border-radius: 20px;
+}
+
+.Dashboard * {
+	margin: 0;
+	padding: 0;
+}

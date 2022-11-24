@@ -1,10 +1,10 @@
 {
-  "name": "vite-rust-wasm-www",
+  "name": "rust-canvas-prototype-www",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "wasm-pack build && vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -14,7 +14,7 @@
     "react-dom": "^18.2.0",
     "vite-plugin-top-level-await": "^1.2.1",
     "vite-plugin-wasm": "^3.1.0",
-	"vite-rust-wasm": "file:../pkg"
+	"rust-canvas-prototype": "file:../pkg"
   },
   "devDependencies": {
     "@types/react": "^18.0.24",

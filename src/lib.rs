@@ -1,8 +1,8 @@
 mod utils;
 use wasm_bindgen::prelude::*;
 extern crate fixedbitset;
-use fixedbitset::FixedBitSet;
 use crate::utils::{set_panic_hook, Timer};
+use fixedbitset::FixedBitSet;
 extern crate web_sys;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
@@ -63,7 +63,7 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
-		let _timer = Timer::new("Universe::tick");
+        let _timer = Timer::new("Universe::tick");
         let mut next = self.cells.clone();
 
         for row in 0..self.height {
@@ -72,13 +72,16 @@ impl Universe {
                 let cell = self.cells[idx];
                 let live_neighbors = self.live_neighbor_count(row, col);
 
-                next.set(idx, match (cell, live_neighbors) {
-					(true, x) if x < 2 => false,
-					(true, 2) | (true, 3) => true,
-					(true, x) if x > 3 => false,
-					(false, 3) => true,
-					(otherwise, _) => otherwise
-				});
+                next.set(
+                    idx,
+                    match (cell, live_neighbors) {
+                        (true, x) if x < 2 => false,
+                        (true, 2) | (true, 3) => true,
+                        (true, x) if x > 3 => false,
+                        (false, 3) => true,
+                        (otherwise, _) => otherwise,
+                    },
+                );
             }
         }
 
@@ -86,13 +89,13 @@ impl Universe {
     }
 
     pub fn new() -> Universe {
-		set_panic_hook();
+        set_panic_hook();
 
         let width = 64;
         let height = 64;
 
-		let size = (width * height) as usize;
-		let mut cells = FixedBitSet::with_capacity(size);
+        let size = (width * height) as usize;
+        let mut cells = FixedBitSet::with_capacity(size);
 
         for i in 0..size {
             cells.set(i, rand::random());
@@ -117,14 +120,14 @@ impl Universe {
         self.cells.as_slice().as_ptr()
     }
 
-	pub fn toggle_cell(&mut self, row: u32, column: u32) {
+    pub fn toggle_cell(&mut self, row: u32, column: u32) {
         let idx = self.get_index(row, column);
-		let value = self.cells[idx];
+        let value = self.cells[idx];
         self.cells.set(idx, !value);
     }
 }
 
-// removed #[wasm_bindgen] - not sent to js 
+// removed #[wasm_bindgen] - not sent to js
 impl Universe {
     /// Get the dead and alive values of the entire universe.
     pub fn get_cells(&self) -> &FixedBitSet {
@@ -140,11 +143,11 @@ impl Universe {
         }
     }
 
-	/// Set the width of the universe.
+    /// Set the width of the universe.
     ///
     /// Resets all cells to the dead state.
     pub fn set_width(&mut self, width: u32) {
-		self.width = width;
+        self.width = width;
         self.cells = FixedBitSet::with_capacity((width * self.height) as usize);
     }
 
@@ -152,14 +155,67 @@ impl Universe {
     ///
     /// Resets all cells to the dead state.
     pub fn set_height(&mut self, height: u32) {
-		self.height = height;
+        self.height = height;
         self.cells = FixedBitSet::with_capacity((self.width * height) as usize);
     }
 }
 
-
 impl Default for Universe {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[wasm_bindgen]
+pub struct CanvasSource {
+    width: u32,
+    height: u32,
+    data: Vec<u8>,
+}
+
+#[wasm_bindgen]
+impl CanvasSource {	
+	pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+	
+	// returns pointer to canvas image data
+	pub fn data(&self) -> *const u8 {
+		self.data.as_ptr()
+	}
+
+	// take in data and start placing pixels from the top right
+	// pub fn scale_to_source(data: Vec<u8>) {}
+
+	// take in data and start placing pixels from a given location
+	// pub fn scale_to_source_from_offset(data: Vec<u8>, h_offset: u32, y_offset: u32) {}
+
+	pub fn cover_in_blood(&mut self) {
+		let blood: Vec<u8> = vec![252, 3, 27, 255];
+		let mut new_data = blood.clone();
+		for _ in 0..self.width {
+			for _ in 0..self.height {
+				let pixel = blood.clone();
+				new_data = [new_data, pixel].concat()
+			}
+		}
+
+		self.data = new_data;
+	}
+
+	pub fn new(width: u32, height: u32, initial_data: Vec<u8>) -> CanvasSource {
+        let data_size = (width * height) as usize;
+        let mut data = initial_data;
+        data.resize(data_size, 0);
+
+        CanvasSource {
+            width,
+            height,
+            data,
+        }
     }
 }
