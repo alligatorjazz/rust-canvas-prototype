@@ -53,7 +53,11 @@ export function DirectCanvas() {
 	useEffect(() => {
 		if (!source) {
 			console.log("loading source");
-			setSource(CanvasSource.new(64, 64, new Uint8Array([])))
+			const width = 100;
+			const height = 100;
+			let initialData: number[] = [];
+			initialData.fill(255, 0, width * height * 4);
+			setSource(CanvasSource.new(width, height, new Uint8Array(initialData)))
 		}
 
 		if (source && !ctx && canvasElement.current) {

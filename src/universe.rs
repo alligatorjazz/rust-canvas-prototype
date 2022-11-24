@@ -71,7 +71,6 @@ impl Universe {
 
         let size = (width * height) as usize;
         let mut cells = FixedBitSet::with_capacity(size);
-
         for i in 0..size {
             cells.set(i, rand::random());
         }

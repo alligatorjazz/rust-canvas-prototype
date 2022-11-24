@@ -15,10 +15,10 @@ function App() {
 				</a>
 			</div>
 			<h1>Vite + React</h1>
-			<div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+			<main>
 				<DirectCanvas />
 				<GameCanvas />
-			</div>
+			</main>
 
 		</div>
 	);

@@ -12,13 +12,13 @@ extern crate web_sys;
 // #[global_allocator]
 // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
+// #[wasm_bindgen]
+// extern "C" {
+//     fn alert(s: &str);
+// }
 
-// TODO: find out why it demands UPPER_SNAKE_CASE
-#[wasm_bindgen] 
-pub fn greet(name: &str) {
-    alert(&format!("Hello {}!", name));
-}
+// // TODO: find out why it demands UPPER_SNAKE_CASE
+// #[wasm_bindgen] 
+// pub fn greet(name: &str) {
+//     alert(&format!("Hello {}!", name));
+// }

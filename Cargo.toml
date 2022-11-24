@@ -23,7 +23,7 @@ wgpu = "0.14"
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.6", optional = true }
 console_log = { version = "0.2", features = ["color"] }
-x
+
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
