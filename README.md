@@ -16,3 +16,8 @@ DirectCanvas DirectCanvas.tsx:77
 
 **How do I allocate a large enough stack size to paint to canvases larger than 100x100?**
 
+## Building and Running
+The project should compile as is: `cd` into `www/` and run `npm i && npm run dev`. 
+
+If that fails, try `wasm-pack build && npm i && npx vite.`
+
