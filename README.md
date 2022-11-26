@@ -1,11 +1,18 @@
-# Rust Canvas Prototype
-**A Rust webassembly starter project with vite as the build tool and React as the frontend library..**
+# Rust Canvas Prototype - Minimal Reproducible Example
 
-Based largely on the Game of Life [rustwasm](https://rustwasm.github.io/) walkthrough found [here](https://rustwasm.github.io/docs/book/game-of-life/implementing.html). More detailed implementation specs for the original project can be found in ORIGNAL_README.md.
+The problem is as follows:
+- I am trying to create a struct that has a large enough data buffer to hold HTML5 canvas ImageData larger than 64 x 64 pixels.
+- The function works correctly for sizes of ~100x100 or less, but once the total area begins to exceed that JS throws the following error:
 
-## Components
-The project comes with two built-in components to test WASM rendering capabilities.
+```
+Uncaught RangeError: attempting to construct out-of-bounds Uint8ClampedArray on ArrayBuffer
+loop DirectCanvas.tsx:23
+DirectCanvas DirectCanvas.tsx:77
+...
+```
 
-`<GameCanvas />` is a Game of Life implementation with a built-in pause / play button. The computation that generates the universe is all done on the rust-side, while the actual work of drawing grid lines and squares to update the canvas display is done in JS. The code for this component was pulled from the [vite-rust-wasm](https://github.com/alligatorjazz/vite-rust-wasm) repo.
+- [Preliminary research](https://www.reddit.com/r/rust/comments/872fc4/how_to_increase_the_stack_size/) suggests that it is a stack size problem on Rust's end, but attempts to increase the stack size in the config.toml throw errors of their own: 
+```= note: rust-lld: error: unknown argument: -Wl,-zstack-size=29491200```
 
-TODO: `<DirectCanvas/ >` is a 2D grid where an image can be clicked and drawn across the grid. The image can be changed to one that the user uploads. This component has *all* of the rendering done on the Rust side, with JS simply reading the image data from a memory buffer.
+**How do I allocate a large enough stack size to paint to canvases larger than 100x100?**
+

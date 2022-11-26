@@ -14,14 +14,3 @@
 .Controls button {
 	width: 100%
 }
-
-.Dashboard {
-	padding: 0.2rem;
-	border: 1px solid darkgrey;
-	border-radius: 20px;
-}
-
-.Dashboard * {
-	margin: 0;
-	padding: 0;
-}

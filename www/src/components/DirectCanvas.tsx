@@ -1,31 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { CanvasSource } from "rust-canvas-prototype";
-import { memory } from "../../../pkg/rust_canvas_prototype_bg.wasm";
-import { useFPS } from "../hooks/useFPS";
+import { memory } from "rust-canvas-prototype/rust_canvas_prototype_bg.wasm";
 import styles from "./DirectCanvas.module.css";
 
 const getRenderLoop = (
 	source: CanvasSource,
 	ctx: CanvasRenderingContext2D,
-	recordFPS?: () => void
 ) => {
 	if (source && ctx) {
 		const loop = () => {
-			recordFPS ? recordFPS() : null;
-			// debugger;
 			const sourceDataPtr = source.data();
-
+			
 			const width = source.width();
 			const height = source.height();
+			const regionSize = width * height * 4;
+			
+			
+			const pixelData = new Uint8ClampedArray(
+				memory.buffer,
+				sourceDataPtr,
+				regionSize
+			)
 
-			const pixelData = new ImageData(
-				new Uint8ClampedArray(
-					memory.buffer,
-					sourceDataPtr,
-					source.width() * source.height() * 4
-				), width, height);
+			const imageData = new ImageData(pixelData, width, height);
 
-			ctx.putImageData(pixelData, 0, 0)
+			ctx.putImageData(imageData, 0, 0)
 		};
 
 		return loop;
@@ -47,17 +46,14 @@ export function DirectCanvas() {
 
 	const initialized = source && ctx;
 
-	const { fps, update } = useFPS();
-
 	// initialization
 	useEffect(() => {
 		if (!source) {
 			console.log("loading source");
-			const width = 100;
-			const height = 100;
-			let initialData: number[] = [];
-			initialData.fill(255, 0, width * height * 4);
-			setSource(CanvasSource.new(width, height, new Uint8Array(initialData)))
+			let [width, height] = [100, 100];
+			// uncomment below to cause error
+			// [width, height] = [358, 358]
+			setSource(CanvasSource.new(width, height, new Uint8Array([])))
 		}
 
 		if (source && !ctx && canvasElement.current) {
@@ -70,7 +66,7 @@ export function DirectCanvas() {
 
 	useEffect(() => {
 		if (initialized) {
-			const renderLoop = getRenderLoop(source, ctx, update);
+			const renderLoop = getRenderLoop(source, ctx);
 			if (renderLoop) {
 				renderLoop();
 				setTimeout(() => {
@@ -82,9 +78,6 @@ export function DirectCanvas() {
 
 	return (
 		<div className={styles.Container}>
-			<div className={styles.Dashboard}>
-				<h5>FPS: {fps.latest}</h5>
-			</div>
 			<span className={styles.Controls}>
 				<button onClick={() => source?.cover_in_blood()}>Splatter</button>
 			</span>

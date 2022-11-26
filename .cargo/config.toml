@@ -1,3 +1,5 @@
 [build]
 target = "wasm32-unknown-unknown" # ensures you won't get "wasm_32 is disabled" errors from intellisense
-rustflags = ["--cfg=web_sys_unstable_apis", "-C"] # custom flags to pass to all compiler invocations
+
+# the commented flags below weren't working for me. i also tried separating them into individual strings.
+rustflags = ["--cfg=web_sys_unstable_apis"] # "-C",  "link-args=-Wl,-zstack-size=29491200"] # custom flags to pass to all compiler invocations
