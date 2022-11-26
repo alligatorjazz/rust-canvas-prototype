@@ -21,3 +21,5 @@ The project should compile as is: `cd` into `www/` and run `npm i && npm run dev
 
 If that fails, try `wasm-pack build && npm i && npx vite.`
 
+The offending data buffer that exceeds the stack size is located in `www/src/components/DirectCanvas.tsx` at line 55.
+
