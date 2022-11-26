@@ -1,1 +1,0 @@
-/Users/bright-silicon/Documents/lab/rust-canvas-prototype/target/wasm32-unknown-unknown/release/librust_canvas_prototype.rlib: /Users/bright-silicon/Documents/lab/rust-canvas-prototype/src/canvas_source.rs /Users/bright-silicon/Documents/lab/rust-canvas-prototype/src/lib.rs /Users/bright-silicon/Documents/lab/rust-canvas-prototype/src/utils.rs
