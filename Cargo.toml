@@ -3,6 +3,7 @@ name = "rust-canvas-prototype"
 version = "0.1.0"
 authors = ["Damian Thomas <damian@falchionstudios.com>"]
 edition = "2018"
+resolver = "2"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -39,6 +40,8 @@ web-sys = { version = "0.3.60", features = [
 	"GpuTextureFormat",
 	"Gpu",
 ] }
+pollster = "0.2.5"
+wasm-bindgen-futures = "0.4.33"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"

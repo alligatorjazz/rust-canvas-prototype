@@ -1,7 +1,7 @@
 mod utils;
 mod canvas_source;
 mod universe;
-use wasm_bindgen::prelude::*;
+// use wasm_bindgen::prelude::*;
 extern crate fixedbitset;
 extern crate web_sys;
 

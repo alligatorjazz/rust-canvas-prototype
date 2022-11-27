@@ -1,4 +1,4 @@
 pkg
-target
+/target/
 temp.rs
 .env
