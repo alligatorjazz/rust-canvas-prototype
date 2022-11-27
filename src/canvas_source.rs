@@ -1,5 +1,6 @@
 #[cfg(web_sys_unstable_apis)]
 use wasm_bindgen::prelude::*;
+
 extern crate fixedbitset;
 extern crate web_sys;
 
