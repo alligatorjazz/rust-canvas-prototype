@@ -25,6 +25,7 @@ struct Vertex {
 }
 unsafe impl bytemuck::Pod for Vertex {}
 unsafe impl bytemuck::Zeroable for Vertex {}
+
 // lib.rs
 impl Vertex {
     fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
@@ -47,20 +48,55 @@ impl Vertex {
     }
 }
 
-const VERTICES: &[Vertex] = &[
+// lib.rs
+const PENTA_VERTEXES: &[Vertex] = &[
     Vertex {
-        position: [0.0, 0.5, 0.0],
-        color: [1.0, 0.0, 0.0],
-    },
+        position: [-0.0868241, 0.49240386, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // A
     Vertex {
-        position: [-0.5, -0.5, 0.0],
-        color: [0.0, 1.0, 0.0],
-    },
+        position: [-0.49513406, 0.06958647, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // B
     Vertex {
-        position: [0.5, -0.5, 0.0],
-        color: [0.0, 0.0, 1.0],
-    },
+        position: [-0.21918549, -0.44939706, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // C
+    Vertex {
+        position: [0.35966998, -0.3473291, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // D
+    Vertex {
+        position: [0.44147372, 0.2347359, 0.0],
+        color: [0.5, 0.0, 0.5],
+    }, // E
 ];
+const PENTA_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+
+const ROLY_VERTEXES: &[Vertex] = &[
+    Vertex {
+        position: [-0.0868241, 0.49240386, 0.0],
+        color: [0.2, 0.0, 0.5],
+    }, // A
+    Vertex {
+        position: [-0.3, 0.06958647, 0.0],
+        color: [0.2, 0.0, 0.5],
+    }, // B
+    Vertex {
+        position: [-0.21918549, -0.44939706, 0.0],
+        color: [0.2, 0.0, 0.5],
+    }, // C
+    Vertex {
+        position: [0.35966998, -0.3473291, 0.0],
+        color: [0.5, 0.0, 0.3],
+    }, // D
+    Vertex {
+        position: [0.8, 0.2347359, 0.0],
+        color: [0.4, 0.0, 0.5],
+    }, // E
+];
+const ROLY_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+
 struct State {
     surface: wgpu::Surface,
     device: wgpu::Device,
@@ -69,7 +105,9 @@ struct State {
     size: winit::dpi::PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
-    num_vertices: u32,
+    index_buffer: wgpu::Buffer,
+	pentagon: bool,
+    num_indices: u32,
 }
 
 impl State {
@@ -191,12 +229,19 @@ impl State {
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
+            contents: bytemuck::cast_slice(PENTA_VERTEXES),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
         surface.configure(&device, &config);
-        let num_vertices = VERTICES.len() as u32;
+
+        // NEW!
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Index Buffer"),
+            contents: bytemuck::cast_slice(PENTA_INDICES),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+        let num_indices = PENTA_INDICES.len() as u32;
 
         Self {
             surface,
@@ -206,7 +251,9 @@ impl State {
             size,
             render_pipeline,
             vertex_buffer,
-            num_vertices,
+            index_buffer,
+			pentagon: true,
+            num_indices,
         }
     }
 
@@ -228,6 +275,49 @@ impl State {
     // TODO: We'll add some code here later on to move around objects.
     fn update(&mut self) {}
 
+	fn change_shape(&mut self) {
+		self.pentagon = !self.pentagon;
+		let device = &self.device;
+		// let surface = &self.surface;
+		// let config = &self.config;
+
+		if self.pentagon {
+			self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: Some("Vertex Buffer"),
+				contents: bytemuck::cast_slice(PENTA_VERTEXES),
+				usage: wgpu::BufferUsages::VERTEX,
+			});
+	
+			// surface.configure(device, config);
+	
+			// NEW!
+			self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: Some("Index Buffer"),
+				contents: bytemuck::cast_slice(PENTA_INDICES),
+				usage: wgpu::BufferUsages::INDEX,
+			});
+			self.num_indices = PENTA_INDICES.len() as u32;
+			
+		}
+		if !self.pentagon {
+			self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: Some("Vertex Buffer"),
+				contents: bytemuck::cast_slice(ROLY_VERTEXES),
+				usage: wgpu::BufferUsages::VERTEX,
+			});
+	
+			// self.surface.configure(&device, &config);
+	
+			// NEW!
+			self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+				label: Some("Index Buffer"),
+				contents: bytemuck::cast_slice(ROLY_INDICES),
+				usage: wgpu::BufferUsages::INDEX,
+			});
+
+			self.num_indices = ROLY_INDICES.len() as u32;
+		}
+	}
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         // waits for the surface to provide a texture to render to
         let output = self.surface.get_current_texture()?;
@@ -265,9 +355,16 @@ impl State {
                 ],
                 depth_stencil_attachment: None,
             });
-            render_pass.set_pipeline(&self.render_pipeline); // 2.
+
+            render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-            render_pass.draw(0..self.num_vertices, 0..1);
+            render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
+			
+			// When using an index buffer, you need to use draw_indexed. The draw method ignores 
+			// the index buffer. Also make sure you use the number of indices (num_indices), not 
+			// vertices as your model will either draw wrong, or the method will 
+			// panic because there are not enough indices.
+            render_pass.draw_indexed(0..self.num_indices, 0, 0..1); // 2.
         }
 
         // submit will accept anything that implements IntoIter
@@ -332,11 +429,11 @@ pub async fn run() {
                         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                             state.resize(**new_inner_size);
                         }
-                        // WindowEvent::MouseInput {button, .. } => {
-                        // 	if *button == MouseButton::Left {
-                        // 		state.color = [1.0, 0.0, 0.0, 0.8];
-                        // 	}
-                        // }
+                        WindowEvent::MouseInput {button, .. } => {
+                        	if *button == MouseButton::Left {
+                        		state.change_shape()
+                        	}
+                        }
                         _ => {}
                     }
                 }

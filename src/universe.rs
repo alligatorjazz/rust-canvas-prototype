@@ -1,6 +1,7 @@
 use wasm_bindgen::prelude::*;
 extern crate fixedbitset;
-use crate::utils::{set_panic_hook, Timer};
+// use crate::utils::{set_panic_hook, Timer};
+use crate::utils::set_panic_hook;
 use fixedbitset::FixedBitSet;
 extern crate web_sys;
 
@@ -38,7 +39,7 @@ impl Universe {
     }
 
     pub fn tick(&mut self) {
-        let _timer = Timer::new("Universe::tick");
+        // let _timer = Timer::new("Universe::tick");
         let mut next = self.cells.clone();
 
         for row in 0..self.height {
