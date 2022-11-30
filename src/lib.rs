@@ -75,27 +75,42 @@ const PENTA_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
 
 const ROLY_VERTEXES: &[Vertex] = &[
     Vertex {
-        position: [-0.0868241, 0.49240386, 0.0],
-        color: [0.2, 0.0, 0.5],
+        position: [0.15, 0.2, 0.0],
+        color: [0.0, 1.0, 0.0],
     }, // A
     Vertex {
-        position: [-0.3, 0.06958647, 0.0],
-        color: [0.2, 0.0, 0.5],
+        position: [0.25, 0.1, 0.0],
+        color: [0.0, 1.0, 0.0],
     }, // B
     Vertex {
-        position: [-0.21918549, -0.44939706, 0.0],
-        color: [0.2, 0.0, 0.5],
+        position: [0.3, 0.0, 0.0],
+        color: [0.0, 1.0, 0.0],
     }, // C
     Vertex {
-        position: [0.35966998, -0.3473291, 0.0],
-        color: [0.5, 0.0, 0.3],
+        position: [0.2, 0.0, 0.0],
+        color: [0.0, 1.0, 0.0],
     }, // D
     Vertex {
-        position: [0.8, 0.2347359, 0.0],
-        color: [0.4, 0.0, 0.5],
+        position: [0.15, 0.1, 0.0],
+        color: [1.0, 1.0, 1.0],
     }, // E
+    Vertex {
+        position: [0.1, 0.0, 0.0],
+        color: [0.0, 1.0, 0.0],
+    }, // F
+    Vertex {
+        position: [0.0, 0.1, 0.0],
+        color: [0.0, 1.0, 0.0],
+    }, // G
 ];
-const ROLY_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+
+const ROLY_INDICES: &[u16] = &[
+	0, 6, 1, 
+	6, 5, 4, 
+	4, 5, 3,
+	4, 3, 1, 
+	1, 3, 2
+];
 
 struct State {
     surface: wgpu::Surface,
@@ -106,7 +121,7 @@ struct State {
     render_pipeline: wgpu::RenderPipeline,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
-	pentagon: bool,
+    pentagon: bool,
     num_indices: u32,
 }
 
@@ -252,7 +267,7 @@ impl State {
             render_pipeline,
             vertex_buffer,
             index_buffer,
-			pentagon: true,
+            pentagon: true,
             num_indices,
         }
     }
@@ -275,49 +290,48 @@ impl State {
     // TODO: We'll add some code here later on to move around objects.
     fn update(&mut self) {}
 
-	fn change_shape(&mut self) {
-		self.pentagon = !self.pentagon;
-		let device = &self.device;
-		// let surface = &self.surface;
-		// let config = &self.config;
+    fn change_shape(&mut self) {
+        self.pentagon = !self.pentagon;
+        let device = &self.device;
+        // let surface = &self.surface;
+        // let config = &self.config;
 
-		if self.pentagon {
-			self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-				label: Some("Vertex Buffer"),
-				contents: bytemuck::cast_slice(PENTA_VERTEXES),
-				usage: wgpu::BufferUsages::VERTEX,
-			});
-	
-			// surface.configure(device, config);
-	
-			// NEW!
-			self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-				label: Some("Index Buffer"),
-				contents: bytemuck::cast_slice(PENTA_INDICES),
-				usage: wgpu::BufferUsages::INDEX,
-			});
-			self.num_indices = PENTA_INDICES.len() as u32;
-			
-		}
-		if !self.pentagon {
-			self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-				label: Some("Vertex Buffer"),
-				contents: bytemuck::cast_slice(ROLY_VERTEXES),
-				usage: wgpu::BufferUsages::VERTEX,
-			});
-	
-			// self.surface.configure(&device, &config);
-	
-			// NEW!
-			self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-				label: Some("Index Buffer"),
-				contents: bytemuck::cast_slice(ROLY_INDICES),
-				usage: wgpu::BufferUsages::INDEX,
-			});
+        if self.pentagon {
+            self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(PENTA_VERTEXES),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
 
-			self.num_indices = ROLY_INDICES.len() as u32;
-		}
-	}
+            // surface.configure(device, config);
+
+            // NEW!
+            self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(PENTA_INDICES),
+                usage: wgpu::BufferUsages::INDEX,
+            });
+            self.num_indices = PENTA_INDICES.len() as u32;
+        }
+        if !self.pentagon {
+            self.vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(ROLY_VERTEXES),
+                usage: wgpu::BufferUsages::VERTEX,
+            });
+
+            // self.surface.configure(&device, &config);
+
+            // NEW!
+            self.index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(ROLY_INDICES),
+                usage: wgpu::BufferUsages::INDEX,
+            });
+
+            self.num_indices = ROLY_INDICES.len() as u32;
+        }
+    }
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         // waits for the surface to provide a texture to render to
         let output = self.surface.get_current_texture()?;
@@ -359,11 +373,11 @@ impl State {
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16); // 1.
-			
-			// When using an index buffer, you need to use draw_indexed. The draw method ignores 
-			// the index buffer. Also make sure you use the number of indices (num_indices), not 
-			// vertices as your model will either draw wrong, or the method will 
-			// panic because there are not enough indices.
+
+            // When using an index buffer, you need to use draw_indexed. The draw method ignores
+            // the index buffer. Also make sure you use the number of indices (num_indices), not
+            // vertices as your model will either draw wrong, or the method will
+            // panic because there are not enough indices.
             render_pass.draw_indexed(0..self.num_indices, 0, 0..1); // 2.
         }
 
@@ -429,10 +443,10 @@ pub async fn run() {
                         WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                             state.resize(**new_inner_size);
                         }
-                        WindowEvent::MouseInput {button, .. } => {
-                        	if *button == MouseButton::Left {
-                        		state.change_shape()
-                        	}
+                        WindowEvent::MouseInput { button, .. } => {
+                            if *button == MouseButton::Left {
+                                state.change_shape()
+                            }
                         }
                         _ => {}
                     }
