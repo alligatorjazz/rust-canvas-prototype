@@ -13,10 +13,7 @@ default = ["console_error_panic_hook"]
 
 [dependencies]
 wasm-bindgen = "0.2.63"
-winit = "0.27"
-env_logger = "0.9"
 log = "0.4"
-wgpu = "0.14"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -32,17 +29,17 @@ wee_alloc = { version = "0.4.5", optional = true }
 getrandom = { version = "0.2", features = ["js"] }
 rand = "0.8.5"
 fixedbitset = "0.4.2"
-
-
 web-sys = { version = "0.3.60", features = [
 	"console",
-	"Gpu",
-	"GpuTextureFormat",
-	"Gpu",
+	"WebGl2RenderingContext",
+	"WebGlProgram",
+	"WebGlShader",
+	"WebGlTexture"
 ] }
-pollster = "0.2.5"
+
 wasm-bindgen-futures = "0.4.33"
-bytemuck = "1.12.3"
+wasm-bindgen-test = "0.3.13"
+
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.13"
