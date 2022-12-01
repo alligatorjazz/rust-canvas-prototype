@@ -1,3 +1,3 @@
 [build]
-target = "wasm32-unknown-unknown" # ensures you won't get "wasm_32 is disabled" errors from intellisense
+# target = "wasm32-unknown-unknown" # ensures you won't get "wasm_32 is disabled" errors from intellisense
 rustflags = ["--cfg=web_sys_unstable_apis"] # custom flags to pass to all compiler invocations
