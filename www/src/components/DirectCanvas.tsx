@@ -59,7 +59,7 @@ export function DirectCanvas() {
 				<h5>FPS: N/A</h5>
 			</div>
 			<span className={styles.Controls}>
-				<button onClick={() => source?.run()}>Splatter</button>
+				<button onClick={() => source?.init()}>Splatter</button>
 			</span>
 			<canvas ref={canvasRef}></canvas>
 		</div>

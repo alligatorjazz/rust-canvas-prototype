@@ -34,7 +34,8 @@ web-sys = { version = "0.3.60", features = [
 	"WebGl2RenderingContext",
 	"WebGlProgram",
 	"WebGlShader",
-	"WebGlTexture"
+	"WebGlTexture",
+	"WebGlUniformLocation"
 ] }
 
 wasm-bindgen-futures = "0.4.33"
