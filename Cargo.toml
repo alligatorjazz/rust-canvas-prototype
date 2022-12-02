@@ -35,11 +35,14 @@ web-sys = { version = "0.3.60", features = [
 	"WebGlProgram",
 	"WebGlShader",
 	"WebGlTexture",
-	"WebGlUniformLocation"
+	"WebGlUniformLocation",
+	"WebGlBuffer"
 ] }
 
 wasm-bindgen-futures = "0.4.33"
 wasm-bindgen-test = "0.3.13"
+js-sys = "0.3.60"
+gl_matrix = "0.0.2"
 
 
 [dev-dependencies]
