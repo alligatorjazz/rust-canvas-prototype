@@ -17,7 +17,7 @@ function App() {
 			<h1>Vite + React</h1>
 			<main>
 				<DirectCanvas />
-				<GameCanvas />
+				{/* <GameCanvas /> */}
 			</main>
 
 		</div>

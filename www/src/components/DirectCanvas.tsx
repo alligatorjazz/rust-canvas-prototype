@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { CanvasSource } from "rust-canvas-prototype/rust_canvas_prototype";
-import { memory } from "rust-canvas-prototype/rust_canvas_prototype_bg.wasm";
 import { useCanvasContext } from "../hooks/useCanvasContext";
 import { useFPS } from "../hooks/useFPS";
 import styles from "./DirectCanvas.module.css";
@@ -36,22 +35,27 @@ import styles from "./DirectCanvas.module.css";
 // }
 
 
+const loadCanvas = (
+	width: number,
+	height: number,
+	ctx: WebGL2RenderingContext | null,
+) => {
+	if (ctx) {
+		console.log("loading CanvasSource");
+		console.assert(ctx ? true : false);
+		return CanvasSource.new(
+			width, height,
+			ctx as WebGL2RenderingContext
+		);
+	}
+
+	return null;
+}
 export function DirectCanvas() {
-	const { ctx, canvasRef } = useCanvasContext("webgl2");
+	const { ctx, canvasRef } = useCanvasContext();
 	const [source, setSource] = useState<CanvasSource | null>(null);
-	// initialization
-	useEffect(() => {
-		if (ctx) {
-			console.log("loading source");
-			const [width, height] = [385, 385];
-			console.assert(ctx ? true : false);
-			setSource(CanvasSource.new(
-				width, height,
-				new Uint8Array(width * height * 4),
-				ctx as WebGL2RenderingContext
-			));
-		}
-	}, [ctx]);
+
+	const [width, height] = [640, 480];
 
 	return (
 		<div className={styles.Container}>
@@ -59,9 +63,13 @@ export function DirectCanvas() {
 				<h5>FPS: N/A</h5>
 			</div>
 			<span className={styles.Controls}>
-				<button onClick={() => source?.init()}>Splatter</button>
+				<button onClick={() => setSource(loadCanvas(
+					width,
+					height,
+					ctx
+				))}>Splatter</button>
 			</span>
-			<canvas ref={canvasRef}></canvas>
+			<canvas ref={canvasRef} width={width} height={height}></canvas>
 		</div>
 	)
 }

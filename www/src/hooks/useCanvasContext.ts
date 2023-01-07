@@ -1,12 +1,12 @@
 import { useCallback,  useState } from "react";
 
-type ContextType = CanvasRenderingContext2D | WebGLRenderingContext | WebGL2RenderingContext | ImageBitmapRenderingContext;
 
-export function useCanvasContext(contextType: "2d" | "webgl" | "webgl2"): {
-	ctx: ContextType | null,
+
+export function useCanvasContext(): {
+	ctx: WebGL2RenderingContext | null,
 	canvasRef: (node: HTMLCanvasElement) => HTMLCanvasElement
 } {
-	const [ctx, setCtx] = useState<ContextType | null>(null);
+	const [ctx, setCtx] = useState<WebGL2RenderingContext | null>(null);
 
 	const canvasRef = useCallback((node: HTMLCanvasElement) => {
 		// Check if a node is actually passed. Otherwise node would be null.
@@ -18,7 +18,7 @@ export function useCanvasContext(contextType: "2d" | "webgl" | "webgl2"): {
 			console.error("canvasRef passed to a non-canvas element.")
 		}
 
-		setCtx(node.getContext(contextType))
+		setCtx(node.getContext("webgl2"))
 		return node;
 	}, [])
 	

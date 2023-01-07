@@ -18,15 +18,6 @@ extern "C" {
 }
 
 #[derive(Debug)]
-#[wasm_bindgen]
-pub struct CanvasSource {
-    width: u32,
-    height: u32,
-    data: Vec<u8>,
-    ctx: WebGl2RenderingContext,
-}
-
-#[derive(Debug)]
 pub struct UniformLocations {
     projection_matrix: WebGlUniformLocation,
     model_view_matrix: WebGlUniformLocation,
@@ -53,17 +44,25 @@ pub struct NamedBuffer<'a> {
 pub type NamedBufferList<'a> = Vec<NamedBuffer<'a>>;
 
 trait SearchableBufferList {
-	fn find(&self, name: &str) -> Option<&WebGlBuffer>;
+    fn find(&self, name: &str) -> Option<&WebGlBuffer>;
 }
 
 impl SearchableBufferList for NamedBufferList<'_> {
-	fn find(&self, name: &str) -> Option<&WebGlBuffer> {
-		let result = self
-			.iter()
-			.find(|&data| data.name == name)
-			.expect(format!("Buffer with name {} not found.", name).as_str());
-		Some(&result.buffer)
-	}
+    fn find(&self, name: &str) -> Option<&WebGlBuffer> {
+        let result = self
+            .iter()
+            .find(|&data| data.name == name)
+            .expect(format!("Buffer with name {} not found.", name).as_str());
+        Some(&result.buffer)
+    }
+}
+
+#[derive(Debug)]
+#[wasm_bindgen]
+pub struct CanvasSource {
+    width: u32,
+    height: u32,
+    ctx: WebGl2RenderingContext,
 }
 
 #[wasm_bindgen]
@@ -76,29 +75,11 @@ impl CanvasSource {
         self.height
     }
 
-    // returns pointer to canvas image data
-    pub fn data(&self) -> *const u8 {
-        self.data.as_ptr()
-    }
-    pub fn cover_in_blood(&mut self) {
-        let mut blood: Vec<u8> = vec![252, 3, 27, 255];
-        let pixel = blood.clone();
-
-        for _ in 0..self.width {
-            for _ in 0..self.height {
-                blood.extend(&pixel)
-            }
-        }
-
-        self.data = blood;
-    }
-
     fn compile_shader(
         ctx: &WebGl2RenderingContext,
         shader_type: u32,
         shader_source: &str,
     ) -> Result<WebGlShader, String> {
-        console_log!("{:?}", ctx);
         console_log!("rs (compile_shader): fetched context from source");
 
         let shader = ctx
@@ -178,70 +159,52 @@ impl CanvasSource {
 
     fn init_buffers(ctx: &WebGl2RenderingContext) -> Vec<NamedBuffer> {
         // Create a buffer for the square's positions.
-        let position_buffer = ctx.create_buffer();
+        let position_buffer = ctx.create_buffer().expect("Could not load position_buffer.");
 
         // Select the position_buffer as the one to apply buffer
         // operations to from here out.
         ctx.bind_buffer(
             WebGl2RenderingContext::ARRAY_BUFFER,
             // as_ref() allows a borrow for a nested value
-            position_buffer.as_ref(),
+            Some(&position_buffer)
         );
 
         // Now pass the list of positions into WebGL to build the
         // shape. We do this by creating a Float32Array from the
         // JavaScript array, then use it to fill the current buffer.
-
-        // TODO: find out why this conversion isn't working
-        let raw_points = [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0];
-        let positions = Float64Array::new(&JsValue::from(raw_points.len()));
-
-        (0..raw_points.len())
-            .for_each(|i| positions.set_index(i.try_into().unwrap(), raw_points[i]));
+        let positions: [f64; 8] = [1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0];
+        console_log!(
+            "rs (init_buffers): positions = {:?}",
+            &Float64Array::from(positions.as_slice()).to_string()
+        );
 
         ctx.buffer_data_with_array_buffer_view(
             WebGl2RenderingContext::ARRAY_BUFFER,
-            &positions,
+            &Float64Array::from(positions.as_slice()),
             WebGl2RenderingContext::STATIC_DRAW,
         );
 
         vec![NamedBuffer {
             name: "position",
-            buffer: position_buffer.expect("Could not initialize position buffer."),
+            buffer: position_buffer,
         }]
     }
 
-    pub fn new(
-        width: u32,
-        height: u32,
-        initial_data: Vec<u8>,
-        ctx: WebGl2RenderingContext,
-    ) -> CanvasSource {
+    pub fn new(width: u32, height: u32, ctx: WebGl2RenderingContext) -> CanvasSource {
         set_panic_hook();
-
-        let data_size = (width * height) as usize;
-        let mut data = initial_data;
-        data.resize(data_size, 0);
-        console_log!("testing to see if context is loaded w/ new: {:?}", ctx);
 
         let shader_program = CanvasSource::init_shader_program(&ctx);
         let buffers = CanvasSource::init_buffers(&ctx);
 
-        // function drawScene(gl, programInfo, buffers) {
-        //   gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
-        //   gl.clearDepth(1.0); // Clear everything
-        //   gl.enable(gl.DEPTH_TEST); // Enable depth testing
-        //   gl.depthFunc(gl.LEQUAL); // Near things obscure far things
         ctx.clear_color(0.0, 0.0, 0.0, 1.0); // Clear to black
         ctx.clear_depth(1.0); // Clear everything
-        ctx.enable(WebGl2RenderingContext::DEPTH_TEST);
-        ctx.depth_func(WebGl2RenderingContext::LEQUAL);
+        ctx.enable(WebGl2RenderingContext::DEPTH_TEST); // Enable depth testing
+        ctx.depth_func(WebGl2RenderingContext::LEQUAL); // Near things obscure far things
 
         // Clear the canvas before we start drawing on it.
         ctx.clear(
             WebGl2RenderingContext::COLOR_BUFFER_BIT | WebGl2RenderingContext::DEPTH_BUFFER_BIT,
         );
-        //   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // Create a perspective matrix, a special matrix that is
         // used to simulate the distortion of perspective in a camera.
@@ -250,21 +213,17 @@ impl CanvasSource {
         // and we only want to see objects between 0.1 units
         // and 100 units away from the camera.
 
-        //   const fieldOfView = (45 * Math.PI) / 180; // in radians
-        //   const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-        //   const zNear = 0.1;
-        //   const zFar = 100.0;
-        //   const projectionMatrix = mat4.create();
-
         let field_of_view = (45.0 * PI) / 180.0; // in radians
         let aspect_ratio = width as f32 / height as f32;
-        let z_near = 0.1;
+        let z_near = 0.01;
         let z_far = 100.0;
-        let mut projection_matrix: Mat4 = [0.; 16];
 
-        // note: glmatrix.js always has the first argument
-        // as the destination to receive the result.
-        //   mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
+        let mut projection_matrix: Mat4 = {
+			let mut matrix = [0.; 16];
+			mat4::identity(&mut matrix);
+			matrix
+		};
+		
         mat4::perspective(
             &mut projection_matrix,
             field_of_view,
@@ -273,91 +232,75 @@ impl CanvasSource {
             Some(z_far),
         );
 
-        //   // Set the drawing position to the "identity" point, which is
-        //   // the center of the scene.
-        //   const modelViewMatrix = mat4.create();
-        let mut model_view_matrix: Mat4 = [0.; 16];
-		mat4::translate(&mut model_view_matrix, &[0.; 16], &[-0.0, 0.0, -6.0]);
-        //   // Now move the drawing position a bit to where we want to
-        //   // start drawing the square.
+		console_log!("rs (run): projection_matrix: {:?}", projection_matrix);
+        // Set the drawing position to the "identity" point, which is
+        // the center of the scene.
 
-        //   mat4.translate(
-        //     modelViewMatrix, // destination matrix
-        //     modelViewMatrix, // matrix to translate
-        //     [-0.0, 0.0, -6.0]
-        //   ); // amount to translate
-
-
-        //   // Tell WebGL how to pull out the positions from the position
-        //   // buffer into the vertexPosition attribute.
-        //   {
-        //     const numComponents = 2; // pull out 2 values per iteration
-        //     const type = gl.FLOAT; // the data in the buffer is 32bit floats
-        //     const normalize = false; // don't normalize
-        //     const stride = 0; // how many bytes to get from one set of values to the next
-        //     // 0 = use type and numComponents above
-        //     const offset = 0; // how many bytes inside the buffer to start from
-        //     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
-        //     gl.vertexAttribPointer(
-        //       programInfo.attribLocations.vertexPosition,
-        //       numComponents,
-        //       type,
-        //       normalize,
-        //       stride,
-        //       offset
-        //     );
-        //     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
-        //   }
-		{
-			let num_components = 2;
-			let data_type = WebGl2RenderingContext::FLOAT;
-			let normalize = false;
-			let stride = 0;
-			let offset = 9;
-
-			ctx.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, buffers.find("position"));
-			ctx.vertex_attrib_pointer_with_i32(
-				shader_program.attrib_locations.vertex_position as u32,
-				num_components,
-				data_type,
-				normalize,
-				stride,
-				offset
-			)
-		}
+        let mut model_view_matrix: Mat4 = {
+			let mut matrix = [0.; 16];
+			mat4::identity(&mut matrix);
+			matrix
+		};
 		
-		// TODO: finish implementing prgrm
+        // Now move the drawing position a bit to where we want to
+        // start drawing the square
+		{
+			let ref_matrix = &model_view_matrix.clone();
+			mat4::translate(&mut model_view_matrix, ref_matrix, &[-0.0, 0.0, -6.0]);
+		}
+        
+		console_log!("rs (run): model_view_matrix: {:?}", model_view_matrix);
+        // Tell WebGL how to pull out the positions from the position
+        // buffer into the vertexPosition attribute.
 
-        //   // Tell WebGL to use our program when drawing
+        {
+            let num_components = 2;
+            let data_type = WebGl2RenderingContext::FLOAT;
+            let normalize = false;
+            let stride = 0;
+            let offset = 0;
+			
+			console_log!("rs (new): position buffer: {:?}", buffers.find("position").unwrap().to_string());
 
-        //   gl.useProgram(programInfo.program);
+            ctx.bind_buffer(
+                WebGl2RenderingContext::ARRAY_BUFFER,
+                buffers.find("position"),
+            );
 
-        //   // Set the shader uniforms
+            ctx.vertex_attrib_pointer_with_i32(
+                shader_program.attrib_locations.vertex_position.try_into().unwrap(),
+                num_components,
+                data_type,
+                normalize,
+                stride,
+                offset,
+            );
 
-        //   gl.uniformMatrix4fv(
-        //     programInfo.uniformLocations.projectionMatrix,
-        //     false,
-        //     projectionMatrix
-        //   );
-        //   gl.uniformMatrix4fv(
-        //     programInfo.uniformLocations.modelViewMatrix,
-        //     false,
-        //     modelViewMatrix
-        //   );
-
-        //   {
-        //     const offset = 0;
-        //     const vertexCount = 4;
-        //     gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
-        //   }
-        // }
-
-        console_log!("rs new(): successfully initialized source");
-        CanvasSource {
-            width,
-            height,
-            data,
-            ctx,
+            ctx.enable_vertex_attrib_array(shader_program.attrib_locations.vertex_position.try_into().unwrap());
         }
+
+        // Tell WebGL to use our program when drawing
+        ctx.use_program(Some(&shader_program.program));
+		
+
+        // Set the shader uniforms
+        ctx.uniform_matrix4fv_with_f32_array(
+            Some(&shader_program.uniform_locations.projection_matrix),
+            false,
+            &projection_matrix,
+        );
+
+        ctx.uniform_matrix4fv_with_f32_array(
+            Some(&shader_program.uniform_locations.model_view_matrix),
+            false,
+            &model_view_matrix,
+        );
+
+        let offset = 0;
+        let vertex_count = 4;
+        ctx.draw_arrays(WebGl2RenderingContext::TRIANGLE_STRIP, offset, vertex_count);
+		console_log!("rs new(): prgm log: {:?}", ctx.get_program_info_log(&shader_program.program));
+        console_log!("rs new(): successfully initialized source");
+        CanvasSource { width, height, ctx }
     }
 }
